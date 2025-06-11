@@ -1,0 +1,221 @@
+<html>
+<head>
+<style>
+	* {
+		font-size: 20px;
+	}
+</style>
+</head>
+
+<body>
+<canvas id="gameCanvas" width="800" height="600"> </canvas>
+
+<script>
+var canvas;
+var canvasContext;
+var ballX = 400;
+var ballY = 300;
+var ballColour;
+var c = 0;
+
+var incrementX = -17;
+//-10
+var incrementY = 0;
+var paddleSpeed = 0;
+var paddle2Speed = 0;
+var spd = 10;
+var ballDirection = 0.1;
+//0.25
+var ballR = 10;
+//10
+
+var p1Score = 0;
+var aiScore = 0;
+var pos = 0;
+var wait = 0;
+var up = 0;
+var gameOver = false;
+var key;
+
+paddle1Y = 250;
+paddle2Y = 250;
+const PADDLE_HEIGHT = 100;
+//100
+
+window.onload = function() {
+	canvas = document.getElementById('gameCanvas');
+	canvasContext = canvas.getContext('2d');
+	setInterval(function() {move(), draw()}, 15);
+	
+	window.addEventListener("keydown", keyPress);
+	window.addEventListener("keyup", keyRelease);
+}
+
+function draw() {
+	canvasContext.fillStyle = 'black';
+	canvasContext.fillRect(0,0,canvas.width,canvas.height);
+	
+	canvasContext.fillStyle = 'white';
+	canvasContext.fillRect(1,paddle1Y,14,PADDLE_HEIGHT);
+	
+	canvasContext.fillStyle = 'white';
+	canvasContext.fillRect(785,paddle2Y,14,PADDLE_HEIGHT);
+	
+	net(20, 15, 1)	
+
+	score()
+
+	ball(ballX, ballY, 'red')
+	
+	if (gameOver) {
+		canvasContext.fillStyle = 'green';
+		canvasContext.fillText("Game Over", 150,160)
+		canvasContext.fillText("Final Score: ", 150,190)
+		canvasContext.fillText("Player - " + p1Score, 165,205)
+		canvasContext.fillText("Ai - " + aiScore, 165,220)
+	}
+}
+
+function move() {
+	paddle1Y += paddleSpeed;
+	paddle2Y += paddle2Speed;
+	
+	if (paddle1Y <= 0) {
+		paddle1Y= 1;
+	} else if (paddle1Y >= canvas.height - 100) {
+		paddle1Y = canvas.height - 101;
+	}
+	if (paddle2Y <= 0) {
+		paddle2Y = 1;
+	} else if (paddle2Y >= canvas.height - 100) {
+		paddle2Y = canvas.height - 101;
+	}	
+
+	if (wait > 32) {
+		ballX = ballX + incrementX;
+		ballY = ballY + incrementY;
+	
+		if (ballY >= paddle1Y && ballY <= paddle1Y + PADDLE_HEIGHT && ballX <= 25) {
+			incrementX = - incrementX;
+			ballX = 26;
+		
+			var deltaY = ballY - (paddle1Y + PADDLE_HEIGHT/2)
+			incrementY = deltaY * ballDirection
+//0.25
+		}
+		if (ballX < 10) {
+			aiScore += 1
+			//pos = 100
+			ballReset()
+		}
+		if (ballY >= paddle2Y && ballY <= paddle2Y + PADDLE_HEIGHT && ballX >= 775) {
+			incrementX = - incrementX;
+			ballX = 776
+		
+			var deltaY = ballY - (paddle2Y + PADDLE_HEIGHT/2)
+			incrementY = deltaY * ballDirection
+		}
+		if (ballX > 790) {
+			p1Score +=1
+			//pos = 700
+			ballReset()
+		}
+		if (ballY > 590 || ballY < 10) {	
+			incrementY = -incrementY
+		}
+	} else { wait += up }
+}
+
+function ball(ballX, ballY, ballColour) {
+	canvasContext.fillStyle = ballColour;
+	canvasContext.beginPath();
+	canvasContext.arc(ballX, ballY, ballR, 0, Math.PI*2, true);
+	canvasContext.fill();
+}
+
+function net(netLength, netInterval, netThick) {
+	for(count = 0; count < canvas.height; count += netInterval + netLength) {
+		canvasContext.fillStyle = 'white';
+		canvasContext.fillRect(canvas.width/2 - netThick/2, count, netThick, netLength);
+	}
+}
+
+function mouse(evt) {
+	var rect = canvas.getBoundingClientRect();
+	var root = document.documentElement;
+	var mouseX = evt.clientX - rect.left - root.scrollLeft;
+	var mouseY = evt.clientY - rect.top - root.scrollTop;
+	return { x:mouseX, y:mouseY };
+}
+
+function ballReset() {
+	incrementY = 0;
+	incrementX = -incrementX;
+	ballX = canvas.width/2;
+	ballY = Math.floor(Math.random()*301 + 150);
+	console.log("Score is: " & c);
+	wait = 0;
+	//paddle2Y = canvas.height/2 - PADDLE_HEIGHT/2;
+	if (aiScore == 10 || p1Score == 10) {
+		up = 0;
+		gameOver = true;
+	}
+}
+
+function score() {
+	canvasContext.fillText("P1 Score: " + p1Score, 150,100)
+	canvasContext.fillText("AI Score: " + aiScore, 550,100)
+}
+
+function keyPress() {
+	switch(event.keyCode) {
+		case 87:
+			paddleSpeed = -spd;
+			break;
+		case 83:
+			paddleSpeed = spd;
+			break;
+		case 32:
+			paddleSpeed = spd;
+			break;
+		case 38:
+			paddle2Speed = -spd;
+			break;
+		case 40:
+			paddle2Speed = spd;
+			break;
+		case 13:
+			up = 0.5;
+			break;
+	}
+}
+
+function keyRelease() {
+	switch(event.keyCode) {
+		case 87:
+			paddleSpeed = 0;
+			break;
+		case 83:
+			paddleSpeed = 0;
+			break;
+		case 32:
+			paddleSpeed = 0;
+			break;
+		case 38:
+			paddle2Speed = 0;
+			break;
+		case 40:
+			paddle2Speed = 0;
+			break;
+	}
+}
+
+</script>
+
+</body>
+</html>
+
+
+
+
+

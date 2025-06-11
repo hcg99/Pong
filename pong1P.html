@@ -1,0 +1,156 @@
+<html>
+<canvas id="gameCanvas" width="800" height="600"> </canvas>
+
+<script>
+var canvas;
+var canvasContext;
+var ballX = 400;
+var ballY = 300;
+var incrementX = -25;
+var incrementY = 0;
+var ballColour;
+var c = 0;
+var aiSpeed = 18;
+var aiZone = 20;
+var p1Score = 0;
+var aiScore = 0;
+var pos = 0;
+var wait = 0;
+var up = 1;
+var gameOver = false;
+var key;
+
+paddle1Y = 250;
+paddle2Y = 250;
+const PADDLE_HEIGHT = 100;
+
+window.onload = function() {
+	canvas = document.getElementById('gameCanvas');
+	canvasContext = canvas.getContext('2d');
+	setInterval(function() {move(), draw(), ai()}, 30);
+
+	canvas.addEventListener('mousemove', function(evt) {
+		var mousePos = mouse(evt);
+		paddle1Y = mousePos.y - PADDLE_HEIGHT/2;
+	});
+}
+
+function draw() {
+	canvasContext.fillStyle = 'black';
+	canvasContext.fillRect(0,0,canvas.width,canvas.height);
+	
+	canvasContext.fillStyle = 'white';
+	canvasContext.fillRect(1,paddle1Y,14,100);
+	
+	canvasContext.fillStyle = 'white';
+	canvasContext.fillRect(785,paddle2Y,14,100);
+	
+	net(20, 15, 1)	
+
+	score()
+
+	ball(ballX, ballY, 'red')
+	
+	if (gameOver) {
+		canvasContext.fillStyle = 'green';
+		canvasContext.fillText("Game Over", 150,160)
+		canvasContext.fillText("Final Score: ", 150,190)
+		canvasContext.fillText("Player - " + p1Score, 165,205)
+		canvasContext.fillText("Ai - " + aiScore, 165,220)
+	}
+}
+
+function move() {
+	if (wait > 32) {
+		ballX = ballX + incrementX;
+		ballY = ballY + incrementY;
+	
+		if (ballY >= paddle1Y && ballY <= paddle1Y + PADDLE_HEIGHT && ballX <= 25) {
+			incrementX = - incrementX;
+			ballX = 26;
+		
+			var deltaY = ballY - (paddle1Y + PADDLE_HEIGHT/2)
+			incrementY = deltaY * 0.5
+		}
+		if (ballX < 10) {
+			aiScore += 1
+			//pos = 100
+			ballReset()
+		}
+		if (ballY >= paddle2Y && ballY <= paddle2Y + PADDLE_HEIGHT && ballX >= 775) {
+			incrementX = - incrementX;
+			ballX = 776
+		
+			var deltaY = ballY - (paddle2Y + PADDLE_HEIGHT/2)
+			incrementY = deltaY * 0.5
+		}
+		if (ballX > 790) {
+			p1Score +=1
+			//pos = 700
+			ballReset()
+		}
+		if (ballY > 590 || ballY < 10) {	
+			incrementY = -incrementY
+		}
+	} else { wait += up }
+}
+
+function ball(ballX, ballY, ballColour) {
+	canvasContext.fillStyle = ballColour;
+	canvasContext.beginPath();
+	canvasContext.arc(ballX, ballY, 10, 0, Math.PI*2, true);
+	canvasContext.fill();
+}
+
+function net(netLength, netInterval, netThick) {
+	for(count = 0; count < canvas.height; count += netInterval + netLength) {
+		canvasContext.fillStyle = 'white';
+		canvasContext.fillRect(canvas.width/2 - netThick/2, count, netThick, netLength);
+	}
+}
+
+function mouse(evt) {
+	var rect = canvas.getBoundingClientRect();
+	var root = document.documentElement;
+	var mouseX = evt.clientX - rect.left - root.scrollLeft;
+	var mouseY = evt.clientY - rect.top - root.scrollTop;
+	return { x:mouseX, y:mouseY };
+}
+
+function ballReset() {
+	incrementY = 0;
+	incrementX = -incrementX;
+	ballX = canvas.width/2;
+	ballY = Math.floor(Math.random()*561 + 20);
+	console.log("Score is: " & c);
+	wait = 0;
+	paddle2Y = canvas.height/2 - PADDLE_HEIGHT/2;
+	if (aiScore == 5 || p1Score == 5) {
+		up = 0;
+		gameOver = true;
+	}
+}
+
+function ai() {	
+	var paddleCenter = paddle2Y + PADDLE_HEIGHT/2;
+		if (paddleCenter < ballY - aiZone) { 
+			paddle2Y = paddle2Y + aiSpeed
+		}
+		if (paddleCenter > ballY + aiZone) { 
+			paddle2Y = paddle2Y - aiSpeed
+		} 
+}
+
+function score() {
+	canvasContext.fillText("P1 Score: " + p1Score, 150,100)
+	canvasContext.fillText("AI Score: " + aiScore, 550,100)
+}
+
+</script>
+
+</html>
+
+
+
+
+
